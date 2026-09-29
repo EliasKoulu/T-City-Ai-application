@@ -4,24 +4,30 @@ Starter template for the **Development of AI Applications** course final group p
 
 ## Team members
 
-- Member 1 Name (email@example.com)
-- Member 2 Name (email@example.com)
-- Member 3 Name (email@example.com)
+- Ari Mononen ari.mononen@student.hamk.fi
+- Elias Rosenberg elias.rosenberg@student.hamk.fi
+- Kim Erwe kim.erwe@student.hamk.fi
+- Riku Turunen riku.turunen@student.hamk.fi
+
 
 ## Problem
 
 ### Intended users
 Who are the primary target users of this application?
+- Mostly office workers and employees who deal with a lot of paperwork.
 
 ### Problem statement
 What specific problem does this application solve for those users?
+- Reduces huge amounts of manual labor.
 
 ### Why AI is appropriate
 Why does this problem require AI / LLM capabilities rather than traditional deterministic software?
+- Deterministic softwares follow a strict pattern which has been determined and dont have the necessary capabilities to process the documents how the user prefers / wants. This problem can be solved with a document analyzer which hass been trained with an LLM and/or uses AI.
 
 ## Solution
 
 Briefly describe your application, its primary value proposition, and how it addresses the problem statement above.
+- Our application of choice will be a document comparison tool. It's primary value comes from saving time and automating redundant repetitive tasks. It's for minimizing mistakes which come from repetitiveness and compares the documents on user input/preference.
 
 ## Main user workflow
 
@@ -49,8 +55,8 @@ Ollama (Local LLM Server)
 
 ## Model
 
-- **Model used:** e.g., `llama3.2` (or specified local Ollama model)
-- **Selection rationale:** Why was this specific model chosen for your project (e.g., lightweight, performance, context size)?
+- **Model used:**
+- **Selection rationale:** 
 
 ## Additional AI capability
 
@@ -61,11 +67,12 @@ Select at least one additional capability to implement for your final project:
 - [ ] Model Context Protocol (MCP)
 - [ ] Agentic workflow (Model-selected actions based on observations)
 - [ ] Memory / Persistent state
-- [ ] Multimodal interaction (Text + Images)
+- [X] Multimodal interaction (Text + Images)
 - [ ] Other: ______________________
 
 ### Capability justification
 Explain why the selected capability is useful and necessary for your application's user problem.
+- We've chosen multimodal interaction. We want the final product to be as versatile as possible and able to analyze different file type documents.
 
 ## Setup
 
