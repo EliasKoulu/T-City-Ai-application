@@ -55,8 +55,8 @@ Ollama (Local LLM Server)
 
 ## Model
 
-- **Model used:**
-- **Selection rationale:** 
+- **Model used:** qwen3:8b
+- **Selection rationale:** We chose qwen 3:8b for our model. We wanted the model to be able to handle long text documents as cost effective as possible. Qwen 3 supports context lenghts of up to 32 thousand tokens and can be extended to 131 thousand using yarn method. It also has support for over 100+ languages and dialects.
 
 ## Additional AI capability
 
