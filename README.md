@@ -1,6 +1,6 @@
 # Project name
 
-Starter template for the **Development of AI Applications** course final group project.
+Compare-and-analyze AI
 
 ## Team members
 
@@ -14,26 +14,26 @@ Starter template for the **Development of AI Applications** course final group p
 
 ### Intended users
 Who are the primary target users of this application?
-- Mostly office workers and employees who deal with a lot of paperwork.
+- The primary target users of this application is mostly workers who frequently analyze, evaluate and compare complex documents. Specifically analysts conducting analysis on products specs or legal team reviewing contracts and policies. In addition the app can be used by everyday people to compare different items to purchase. 
 
 ### Problem statement
 What specific problem does this application solve for those users?
-- Reduces huge amounts of manual labor.
+- Comparing documents manually is time consuming and it can be prone to errors. This application provides thorough comparison between documents and summarizes key differences and similarities by saving users time and preventing high costs.
 
 ### Why AI is appropriate
 Why does this problem require AI / LLM capabilities rather than traditional deterministic software?
-- Deterministic softwares follow a strict pattern which has been determined and dont have the necessary capabilities to process the documents how the user prefers / wants. This problem can be solved with a document analyzer which hass been trained with an LLM and/or uses AI.
+- Deterministic softwares follow a strict pattern which has been determined and doesn't have the necessary capabilities to process the documents how the user prefers / wants. This problem can be solved with a document analyzer which has been trained with an LLM and/or uses AI.
 
 ## Solution
 
 Briefly describe your application, its primary value proposition, and how it addresses the problem statement above.
-- Our application of choice will be a document comparison tool. It's primary value comes from saving time and automating redundant repetitive tasks. It's for minimizing mistakes which come from repetitiveness and compares the documents on user input/preference.
+- Our application of choice will be a document comparison tool designed to analyze two documents and summarize key differences. It's primary value comes from saving time and automating redundant repetitive tasks. It's for minimizing mistakes which come from repetitiveness and compares the documents on user input/preference.
 
 ## Main user workflow
 
-1. **User Input:** The user submits a prompt or query via the Gradio user interface.
-2. **Processing & Guardrails:** The application service layer (`src/services/ai_service.py`) validates and formats the request.
-3. **Model Response:** The model client calls Ollama locally and returns the response back through the service layer to the UI.
+1. **User Input:** The user uploads two documents (PDF or word document) containing product specs or contracts to compare. In addition the details can be also copy-pasted in plain text format. The user then specifies and tells the program which key points and areas to focus on.
+2. **Processing & Guardrails:** The application checks for supported file formats and size limit of the documents to be uploaded. The app focuses on raw text and pictures ignoring the layout of the document.
+3. **Model Response:** The model generates a structured analysis containing a side-by-side comparison of the two documents. After that it is presented to the user as a clear visual comparison table.
 
 ## Architecture
 
@@ -56,7 +56,7 @@ Ollama (Local LLM Server)
 ## Model
 
 - **Model used:** qwen3:8b
-- **Selection rationale:** We chose qwen 3:8b for our model. We wanted the model to be able to handle long text documents as cost effective as possible. Qwen 3 supports context lenghts of up to 32 thousand tokens and can be extended to 131 thousand using yarn method. It also has support for over 100+ languages and dialects.
+- **Selection rationale:** We chose qwen 3:8b for our model. We wanted the model to be able to handle long text documents as cost effective as possible. Qwen3 supports context lengths of up to 32 thousand tokens and can be extended to 131 thousand using yarn method. It also has support for over 100+ languages and dialects.
 
 ## Additional AI capability
 
@@ -72,7 +72,7 @@ Select at least one additional capability to implement for your final project:
 
 ### Capability justification
 Explain why the selected capability is useful and necessary for your application's user problem.
-- We've chosen multimodal interaction. We want the final product to be as versatile as possible and able to analyze different file type documents.
+- Multimodal interaction allows the application to process text and visual elements simultaneously. Real world documents often rely on diagrams and embedded images so this will give a thorough and more accurate analysis of the documents rather than just focusing on raw text.
 
 ## Setup
 
