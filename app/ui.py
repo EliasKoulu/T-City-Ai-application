@@ -1,7 +1,6 @@
 import gradio as gr
 from src.services.ai_service import generate_response
 
-
 def build_ui() -> gr.Blocks:
     """
     Constructs the Gradio web interface.
@@ -9,41 +8,54 @@ def build_ui() -> gr.Blocks:
     Architectural Principle: The UI communicates strictly with `generate_response()`
     in the AI service layer and never directly with Ollama or the model client.
     """
-    with gr.Blocks(title="AI Application Starter") as demo:
+    with gr.Blocks(title="Oikotie-vertailukone", theme=gr.themes.Soft()) as demo:
         gr.Markdown(
             """
-            # AI Application Starter
+            # 🏠 Oikotie Asuntoesitteiden Vertailukone
             
-            Welcome to the AI Application Starter repository.
-            Type a prompt below to interact with your local AI service.
+            Tervetuloa asuntotyökaluun! Lataa alle kaksi PDF-muotoista asuntoesitettä Oikotiestä. 
+            Tekoäly lukee esitteet ja tekee niistä sinulle tiivistetyn vertailun.
             """
         )
 
         with gr.Row():
-            user_input = gr.Textbox(
-                lines=3,
-                placeholder="Type your message here...",
-                label="User Prompt",
-            )
-
-        submit_btn = gr.Button("Send", variant="primary")
+            with gr.Column():
+                pdf1_input = gr.File(
+                    label="Lataa Asunto 1:n esite (PDF)", 
+                    file_types=[".pdf"],
+                    type="filepath" # Palauttaa tiedostopolun suoraan palvelukerrokselle
+                )
+            with gr.Column():
+                pdf2_input = gr.File(
+                    label="Lataa Asunto 2:n esite (PDF)", 
+                    file_types=[".pdf"],
+                    type="filepath"
+                )
 
         with gr.Row():
-            output_box = gr.Textbox(
-                lines=8,
-                label="AI Response",
-                interactive=False,
+            user_query = gr.Textbox(
+                lines=2,
+                placeholder="Esim. Vertaile näiden asuntojen putkiremonttitilannetta ja lämmitysmuotoja...",
+                label="Mitä haluat erityisesti vertailla? (Valinnainen)"
+            )
+
+        submit_btn = gr.Button("Vertaile asunnot", variant="primary")
+
+        with gr.Row():
+            # Markdown-komponentti renderöi tekoälyn tekemät taulukot kauniisti
+            output_box = gr.Markdown(
+                label="Vertailun tulos"
             )
 
         # Connect UI actions exclusively to the service layer function
         submit_btn.click(
             fn=generate_response,
-            inputs=user_input,
+            inputs=[pdf1_input, pdf2_input, user_query],
             outputs=output_box,
         )
-        user_input.submit(
+        user_query.submit(
             fn=generate_response,
-            inputs=user_input,
+            inputs=[pdf1_input, pdf2_input, user_query],
             outputs=output_box,
         )
 
