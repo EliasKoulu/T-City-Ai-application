@@ -1,15 +1,11 @@
 from pydantic import BaseModel, Field
 
 
-class UserRequest(BaseModel):
-    """Minimal schema for validating incoming user input."""
-
-    message: str = Field(..., description="The user's prompt or message.")
-
-
-class AIResponse(BaseModel):
-    """Minimal schema for structured response output from the AI service layer."""
-
-    content: str = Field(..., description="The generated response text or user-friendly error message.")
-    success: bool = Field(True, description="Flag indicating if the operation succeeded.")
-    error_message: str | None = Field(None, description="Detailed error description if success is False.")
+class PropertyComparison(BaseModel):
+    property_a_name: str = Field(description="Ensimmäisen asunnon nimi tai osoite")
+    property_b_name: str = Field(description="Toisen asunnon nimi tai osoite")
+    price_comparison: str = Field(description="Pyyntihintojen ja neliöhintojen vertailu")
+    size_and_rooms: str = Field(description="Pinta-alan ja huoneluvun vertailu")
+    condition_and_renovations: str = Field(description="Asuntojen kunto ja tehdyt/tulevat remontit (esim. putkiremontti)")
+    pros_cons_summary: str = Field(description="Molemman asunnon hyvät ja huonot puolet")
+    verdict: str = Field(description="Yhteenveto ja suositus siitä, kummalle ostajalle kumpikin asunto sopii")
