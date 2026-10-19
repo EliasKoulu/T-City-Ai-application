@@ -116,6 +116,7 @@ Noudata tiukasti seuraavia sääntöjä:
 2. Jos jotain tietoa ei löydy esitteestä (esim. hoitovastiketta), kirjoita kohdalle: "Ei mainittu esitteessä".
 3. Rakenna vertailusta aina selkeä Markdown-taulukko (sarakkeet: Ominaisuus | Asunto A | Asunto B).
 4. Esitä taulukon alapuolella lyhyt yhteenveto asuntojen suurimmista eroista sekä ostajasuositus.
+5. Vertailtavien tiedostojen otsikko on vasemmalla ja itse otsikkoa vastaava tieto oikealla.
 """
 
 

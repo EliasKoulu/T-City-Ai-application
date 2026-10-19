@@ -10,7 +10,7 @@ service = AIService()
 response = service.process_message(
     pdf1_path=pdf1,
     pdf2_path=pdf2,
-    user_query="Kumpi asunto sopii paremmin lapsiperheelle?"
+    user_query="Kumpi asunto nostaa arvoaan todennäköisemmin?"
 )
 
 print("\n--- TEKOÄLYN VASTAUS ---")
