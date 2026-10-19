@@ -61,7 +61,7 @@ class RAGService:
         return full_text
 
     # Pilkkoo tekstin päällekkäisiksi palasiksi
-    def _create_chunks(self, text, chunk_size=300, overlap=50):
+    def _create_chunks(self, text, chunk_size=150, overlap=25):
         chunks = []
         start = 0
         while start < len(text):
@@ -109,7 +109,7 @@ class RAGService:
         )
 
     # Etsii käyttäjän kysymystä vastaavat parhaat chunkit ChromaDB:stä
-    def search_context(self, query, top_k=4):
+    def search_context(self, query, top_k=12):
         if self.collection.count() == 0:
             return ""
 
