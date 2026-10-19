@@ -24,18 +24,26 @@ class OllamaModelClient:
     def __init__(self, base_url: Optional[str] = None, model_name: Optional[str] = None):
         self.base_url = base_url or config.ollama_base_url
         self.model_name = model_name or config.model_name
-        self._client = ollama.Client(host=self.base_url)
+        # Lisätty timeout=300 (5 min), jotta raskas vertailu tai qwen3:8b ei katkea ReadTimeout-virheeseen
+        self._client = ollama.Client(host=self.base_url, timeout=600)
 
-    def generate(self, prompt: str) -> str:
+    def generate(self, prompt: str, system_prompt: Optional[str] = None, temperature: float = 0.1) -> str:
         """
-        Sends a user prompt to local Ollama model and returns generated response text.
+        Sends a user prompt (and optional system prompt) to local Ollama model and returns generated response text.
         
         Raises ModelClientError subclass if connection or execution fails.
         """
         try:
+            # Rakennetaan viestilista
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": prompt})
+
             response = self._client.chat(
                 model=self.model_name,
-                messages=[{"role": "user", "content": prompt}],
+                messages=messages,
+                options={"temperature": temperature}, # Ohjataan malli pysymään faktoissa
             )
             
             # Standardize extraction from dict or chat response object

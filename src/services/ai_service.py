@@ -108,6 +108,16 @@ from src.schemas.responses import AIResponse
 # Tuodaan Arin tekemä RAG-palvelu
 from src.capabilities.rag import RAGService
 
+#Määritellään tekoälyn rooli ja toimintasäännöt
+SYSTEM_PROMPT = """Olet ammattimainen ja objektiivinen kiinteistöalan asiantuntija. Tehtäväsi on vertailla kahta Oikotien asuntoilmoitusta täsmällisesti.
+
+Noudata tiukasti seuraavia sääntöjä:
+1. Käytä AINOASTAAN annettua lähdetekstiä. Älä keksi omia hintoja, neliöitä, hoitovastikkeita tai remonttitietoja.
+2. Jos jotain tietoa ei löydy esitteestä (esim. hoitovastiketta), kirjoita kohdalle: "Ei mainittu esitteessä".
+3. Rakenna vertailusta aina selkeä Markdown-taulukko (sarakkeet: Ominaisuus | Asunto A | Asunto B).
+4. Esitä taulukon alapuolella lyhyt yhteenveto asuntojen suurimmista eroista sekä ostajasuositus.
+"""
+
 
 class AIService:
     """
@@ -152,21 +162,23 @@ class AIService:
             hakusana = user_query if user_query and user_query.strip() else "asuntojen koko, hinta, kunto ja lämmitys"
             context = rag.search_context(hakusana, top_k=6)
             
-            # 4. Promptin rakentaminen mallille
-            prompt = f"""Olet ammattimainen kiinteistöalan asiantuntija. Tehtäväsi on vertailla kahta asuntoa selkeästi ja puolueettomasti.
+            erityistoive = user_query if user_query and user_query.strip() else "Tee yleinen vertailu tärkeimmistä ominaisuuksista."
+            
+            user_prompt = f"""Käyttäjän erityistoive vertailulle: "{erityistoive}"
 
-Käyttäjän erityistoive vertailulle: "{user_query if user_query else 'Tee yleinen vertailu tärkeimmistä ominaisuuksista.'}"
-
-Käytä vertailussa AINOASTAAN alla olevaa lähdetekstiä (Oikotien esitteistä irrotettua tietoa). Älä keksi omia hintoja tai neliömääriä.
-Muotoile vastauksesi selkeäksi Markdown-taulukoksi ja listaa sen alle tärkeimmät erot.
-
-LÄHDETEKSTI:
+LÄHDETEKSTI (Oikotien esitteistä irrotettu tieto):
 {context}
+
+Rakenna näiden tietojen pohjalta selkeä vertailu.
 """
 
             # 5. Kutsutaan Ollama-mallia
             client = self._get_client()
-            response_text = client.generate(prompt)
+            response_text = client.generate(
+                prompt=user_prompt,
+                system_prompt=SYSTEM_PROMPT,
+                temperature=0.1
+            )
 
             return AIResponse(
                 content=response_text,
