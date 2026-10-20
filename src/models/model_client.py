@@ -25,7 +25,7 @@ class OllamaModelClient:
         self.base_url = base_url or config.ollama_base_url
         self.model_name = model_name or config.model_name
         # Lisätty timeout=300 (5 min), jotta raskas vertailu tai qwen3:8b ei katkea ReadTimeout-virheeseen
-        self._client = ollama.Client(host=self.base_url, timeout=600)
+        self._client = ollama.Client(host=self.base_url)
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None, temperature: float = 0.1) -> str:
         """
