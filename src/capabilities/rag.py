@@ -40,15 +40,17 @@ from sentence_transformers import SentenceTransformer
 class RAGService:
 
     def __init__(self):
-
-        self.encoder = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+        self.encoder = SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
 
         # Alustetaan ChromaDB
         self.chroma_client = chromadb.Client()
+
+        # Alustetaan kokoelma jo oliota luotaessa
         self.collection = self.chroma_client.get_or_create_collection(
-            name="asuntoilmoitukset",
-            metadata={"hnsw:space": "cosine"}
+        name="asuntoilmoitukset",
+        metadata={"hnsw:space": "cosine"}
         )
+
 
     # Lukee PDF-tiedoston pelkäksi tekstiksi
     def _pdf_to_text(self, pdf_path):
@@ -61,7 +63,7 @@ class RAGService:
         return full_text
 
     # Pilkkoo tekstin päällekkäisiksi palasiksi
-    def _create_chunks(self, text, chunk_size=150, overlap=25):
+    def _create_chunks(self, text, chunk_size=400, overlap=100):
         chunks = []
         start = 0
         while start < len(text):
@@ -73,7 +75,19 @@ class RAGService:
         return chunks
 
     # Lukee molemmat PDF:t, pilkkoo ne ja tallentaa ChromaDB-vektoritietokantaan
-    def process_documents(self, pdf1_path, pdf2_path): 
+    def process_documents(self, pdf1_path, pdf2_path):
+
+        # Poistetaan vanha kokoelma, jotta vanhat tiedostot eivät sekoitu!
+        try:
+            self.chroma_client.delete_collection("asuntoilmoitukset")
+        except Exception:
+            pass
+
+        self.collection = self.chroma_client.get_or_create_collection(
+            name="asuntoilmoitukset",
+            metadata={"hnsw:space": "cosine"}
+        )
+
         text1 = self._pdf_to_text(pdf1_path)
         text2 = self._pdf_to_text(pdf2_path)
 
@@ -81,24 +95,25 @@ class RAGService:
         metadatas = []
         ids = []
 
-        # Lisätään merkit [ASUNTO 1] ja [ASUNTO 2] sekä kerätään metatiedot
+        # Kerätään tekstipalat ja metatiedot omiksi asuntoikseen
         for i, chunk in enumerate(self._create_chunks(text1), start=1):
-            doc_text = f"[ASUNTO 1]: {chunk}"
-            documents.append(doc_text)
+            documents.append(chunk)
             metadatas.append({"asunto": "ASUNTO 1"})
             ids.append(f"asunto1-c{i}")
 
         for i, chunk in enumerate(self._create_chunks(text2), start=1):
-            doc_text = f"[ASUNTO 2]: {chunk}"
-            documents.append(doc_text)
+            documents.append(chunk)
             metadatas.append({"asunto": "ASUNTO 2"})
             ids.append(f"asunto2-c{i}")
 
-        # Luodaan vektorit (embeddings) harjoituksen mukaisesti
-        embeddings = self.encoder.encode(
-            documents, 
-            normalize_embeddings=True
-        ).tolist()
+        # Varmistetaan, että tekstiä löytyi ennen vektorointia
+        if not documents:
+            return
+
+
+        # Luodaan vektorit (embeddings)
+        embeddings = self.encoder.encode(documents, normalize_embeddings=True).tolist()
+
 
         # Tallennetaan tiedot Chroma-kokoelmaan (upsert)
         self.collection.upsert(
@@ -109,23 +124,33 @@ class RAGService:
         )
 
     # Etsii käyttäjän kysymystä vastaavat parhaat chunkit ChromaDB:stä
-    def search_context(self, query, top_k=12):
-        if self.collection.count() == 0:
+    def search_context(self, query, top_k=5):
+        if self.collection is None or self.collection.count() == 0:
             return ""
 
         # Muutetaan käyttäjän kysymys vektoriksi
-        query_vector = self.encoder.encode(
-            [query], 
-            normalize_embeddings=True
-        ).tolist()[0]
+        query_vector = self.encoder.encode([query], normalize_embeddings=True).tolist()[0]
 
-        # Hetaan Chroma-kokoelmasta lähimmät tekstipalat
-        result = self.collection.query(
+        # Haetaan tiedot ERIKSEEN molemmille asunnoille metadatan avulla
+        res1 = self.collection.query(
             query_embeddings=[query_vector],
             n_results=min(top_k, self.collection.count()),
-            include=["documents", "metadatas", "distances"]
+            where={"asunto": "ASUNTO 1"},
+            include=["documents"]
         )
 
-        # Kootaan haetut tekstipalat yhdeksi merkkijonoksi
-        retrieved_docs = result["documents"][0] if result["documents"] else []
-        return "\n\n".join(retrieved_docs)
+        res2 = self.collection.query(
+            query_embeddings=[query_vector],
+            n_results=min(top_k, self.collection.count()),
+            where={"asunto": "ASUNTO 2"},
+            include=["documents"]
+        )
+
+        docs1 = res1["documents"][0] if res1["documents"] else []
+        docs2 = res2["documents"][0] if res2["documents"] else []
+
+        # Ryhmitellään tulokset selkeästi ennen tekoälylle lähettämistä
+        context = "--- LÄHDETIEDOT ASUNTO 1 ---\n" + "\n".join(docs1)
+        context += "\n\n--- LÄHDETIEDOT ASUNTO 2 ---\n" + "\n".join(docs2)
+
+        return context

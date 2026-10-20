@@ -162,7 +162,7 @@ class AIService:
             # 3. Tiedonhaku: Etsitään oleellinen konteksti vektoritietokannasta
             # Jos käyttäjä ei antanut erityistoivetta, käytetään yleistä vertailuhakua
             hakusana = user_query if user_query and user_query.strip() else "asuntojen koko, hinta, kunto ja lämmitys"
-            context = rag.search_context(hakusana, top_k=6)
+            context = rag.search_context(hakusana, top_k=2)
             
             erityistoive = user_query if user_query and user_query.strip() else "Tee yleinen vertailu tärkeimmistä ominaisuuksista."
             
