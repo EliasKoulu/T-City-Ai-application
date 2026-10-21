@@ -33,6 +33,7 @@ specific custom documents or static domain knowledge bases.
 
 
 import chromadb
+from pathlib import Path
 from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
 
@@ -45,7 +46,7 @@ class RAGService:
         # Alustetaan ChromaDB
         self.chroma_client = chromadb.Client()
 
-        # Alustetaan kokoelma oliota luotaessa
+        # Alustetaan kokoelma
         self.collection = self.chroma_client.get_or_create_collection(
             name="asuntoilmoitukset",
             metadata={"hnsw:space": "cosine"}
@@ -61,8 +62,8 @@ class RAGService:
                 full_text += text + "\n"
         return full_text
 
-    # Kasvatetaan chunk-kokoa (1000 merkkiä), jotta taulukko-osiot pysyvät ehyinä
-    def _create_chunks(self, text, chunk_size=1000, overlap=200):
+    # Riittävän suuri chunk-koko (800 merkkiä), jotta taulukkorivit pysyvät ehyinä
+    def _create_chunks(self, text, chunk_size=800, overlap=150):
         chunks = []
         start = 0
         while start < len(text):
@@ -74,7 +75,7 @@ class RAGService:
         return chunks
 
     def process_documents(self, pdf1_path, pdf2_path):
-        # Poistetaan vanha kokoelma, jotta vanhat tiedostot eivät sekoitu
+        # Tyhjennetään tietokanta ennen uutta vertailua
         try:
             self.chroma_client.delete_collection("asuntoilmoitukset")
         except Exception:
@@ -92,15 +93,19 @@ class RAGService:
         metadatas = []
         ids = []
 
-        # Lisätään asuntotunniste SUORAAN tekstipalaan, jotta tekoäly ei sekoita niitä!
+        # Haetaan dynaamisesti tiedostojen nimet (esim. "esite1.pdf" -> "esite1")
+        name1 = Path(pdf1_path).stem
+        name2 = Path(pdf2_path).stem
+
+        # Tallennetaan tekstit sellaisenaan ilman sotkevia etuliitteitä
         for i, chunk in enumerate(self._create_chunks(text1), start=1):
-            documents.append(f"[LÄHDE: ASUNTO 1 (Ravaksenkatu)]\n{chunk}")
-            metadatas.append({"asunto": "ASUNTO 1"})
+            documents.append(chunk)
+            metadatas.append({"asunto": "ASUNTO 1", "filename": name1})
             ids.append(f"asunto1-c{i}")
 
         for i, chunk in enumerate(self._create_chunks(text2), start=1):
-            documents.append(f"[LÄHDE: ASUNTO 2 (Purpurikuja)]\n{chunk}")
-            metadatas.append({"asunto": "ASUNTO 2"})
+            documents.append(chunk)
+            metadatas.append({"asunto": "ASUNTO 2", "filename": name2})
             ids.append(f"asunto2-c{i}")
 
         if not documents:
@@ -115,13 +120,13 @@ class RAGService:
             metadatas=metadatas
         )
 
-    def search_context(self, query, top_k=6):
+    def search_context(self, query, top_k=4):
         if self.collection is None or self.collection.count() == 0:
             return ""
 
         query_vector = self.encoder.encode([query], normalize_embeddings=True).tolist()[0]
 
-        # Haetaan runsaammin paloja (top_k=6 per asunto), jotta taulukkotiedot mahtuvat mukaan
+        # Haetaan 4 parasta palaa kummallekkin asunnolle erikseen metadatan perusteella
         res1 = self.collection.query(
             query_embeddings=[query_vector],
             n_results=min(top_k, self.collection.count()),
@@ -139,7 +144,8 @@ class RAGService:
         docs1 = res1["documents"][0] if res1["documents"] else []
         docs2 = res2["documents"][0] if res2["documents"] else []
 
-        context = "=== ASUNTO 1 (Ravaksenkatu) LÄHDETIEDOT ===\n" + "\n\n".join(docs1)
-        context += "\n\n=== ASUNTO 2 (Purpurikuja) LÄHDETIEDOT ===\n" + "\n\n".join(docs2)
+        # Ryhmitellään konteksti siistiksi kahden selkeän osion alle
+        context = "### LÄHDETIEDOT: ASUNTO 1 (Ensimmäinen ladatun tiedoston kohde)\n" + "\n\n".join(docs1)
+        context += "\n\n### LÄHDETIEDOT: ASUNTO 2 (Toisen ladatun tiedoston kohde)\n" + "\n\n".join(docs2)
 
         return context
