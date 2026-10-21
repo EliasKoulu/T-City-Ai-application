@@ -45,12 +45,11 @@ class RAGService:
         # Alustetaan ChromaDB
         self.chroma_client = chromadb.Client()
 
-        # Alustetaan kokoelma jo oliota luotaessa
+        # Alustetaan kokoelma oliota luotaessa
         self.collection = self.chroma_client.get_or_create_collection(
-        name="asuntoilmoitukset",
-        metadata={"hnsw:space": "cosine"}
+            name="asuntoilmoitukset",
+            metadata={"hnsw:space": "cosine"}
         )
-
 
     # Lukee PDF-tiedoston pelkäksi tekstiksi
     def _pdf_to_text(self, pdf_path):
@@ -62,8 +61,8 @@ class RAGService:
                 full_text += text + "\n"
         return full_text
 
-    # Pilkkoo tekstin päällekkäisiksi palasiksi
-    def _create_chunks(self, text, chunk_size=400, overlap=100):
+    # Kasvatetaan chunk-kokoa (1000 merkkiä), jotta taulukko-osiot pysyvät ehyinä
+    def _create_chunks(self, text, chunk_size=1000, overlap=200):
         chunks = []
         start = 0
         while start < len(text):
@@ -74,10 +73,8 @@ class RAGService:
             start += chunk_size - overlap
         return chunks
 
-    # Lukee molemmat PDF:t, pilkkoo ne ja tallentaa ChromaDB-vektoritietokantaan
     def process_documents(self, pdf1_path, pdf2_path):
-
-        # Poistetaan vanha kokoelma, jotta vanhat tiedostot eivät sekoitu!
+        # Poistetaan vanha kokoelma, jotta vanhat tiedostot eivät sekoitu
         try:
             self.chroma_client.delete_collection("asuntoilmoitukset")
         except Exception:
@@ -95,27 +92,22 @@ class RAGService:
         metadatas = []
         ids = []
 
-        # Kerätään tekstipalat ja metatiedot omiksi asuntoikseen
+        # Lisätään asuntotunniste SUORAAN tekstipalaan, jotta tekoäly ei sekoita niitä!
         for i, chunk in enumerate(self._create_chunks(text1), start=1):
-            documents.append(chunk)
+            documents.append(f"[LÄHDE: ASUNTO 1 (Ravaksenkatu)]\n{chunk}")
             metadatas.append({"asunto": "ASUNTO 1"})
             ids.append(f"asunto1-c{i}")
 
         for i, chunk in enumerate(self._create_chunks(text2), start=1):
-            documents.append(chunk)
+            documents.append(f"[LÄHDE: ASUNTO 2 (Purpurikuja)]\n{chunk}")
             metadatas.append({"asunto": "ASUNTO 2"})
             ids.append(f"asunto2-c{i}")
 
-        # Varmistetaan, että tekstiä löytyi ennen vektorointia
         if not documents:
             return
 
-
-        # Luodaan vektorit (embeddings)
         embeddings = self.encoder.encode(documents, normalize_embeddings=True).tolist()
 
-
-        # Tallennetaan tiedot Chroma-kokoelmaan (upsert)
         self.collection.upsert(
             ids=ids,
             embeddings=embeddings,
@@ -123,15 +115,13 @@ class RAGService:
             metadatas=metadatas
         )
 
-    # Etsii käyttäjän kysymystä vastaavat parhaat chunkit ChromaDB:stä
-    def search_context(self, query, top_k=5):
+    def search_context(self, query, top_k=6):
         if self.collection is None or self.collection.count() == 0:
             return ""
 
-        # Muutetaan käyttäjän kysymys vektoriksi
         query_vector = self.encoder.encode([query], normalize_embeddings=True).tolist()[0]
 
-        # Haetaan tiedot ERIKSEEN molemmille asunnoille metadatan avulla
+        # Haetaan runsaammin paloja (top_k=6 per asunto), jotta taulukkotiedot mahtuvat mukaan
         res1 = self.collection.query(
             query_embeddings=[query_vector],
             n_results=min(top_k, self.collection.count()),
@@ -149,8 +139,7 @@ class RAGService:
         docs1 = res1["documents"][0] if res1["documents"] else []
         docs2 = res2["documents"][0] if res2["documents"] else []
 
-        # Ryhmitellään tulokset selkeästi ennen tekoälylle lähettämistä
-        context = "--- LÄHDETIEDOT ASUNTO 1 ---\n" + "\n".join(docs1)
-        context += "\n\n--- LÄHDETIEDOT ASUNTO 2 ---\n" + "\n".join(docs2)
+        context = "=== ASUNTO 1 (Ravaksenkatu) LÄHDETIEDOT ===\n" + "\n\n".join(docs1)
+        context += "\n\n=== ASUNTO 2 (Purpurikuja) LÄHDETIEDOT ===\n" + "\n\n".join(docs2)
 
         return context
