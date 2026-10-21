@@ -31,7 +31,22 @@ Use this decision log to document significant technical and architectural choice
 ## Decision 3 — Architecture
 
 **Decision:**
-- asdasd
+```text
+User (Uploading the PDF-files and query)
+  ↓
+Gradio UI (app/ui.py). The user interface layer that receives the uploaded PDF-files and optional user queries.
+  ↓
+Application / AI Service (src/services/ai_service.py)
+  |--> RAG (src/capabilities/rag.py)
+  |      |---> PyPDF (PDF text extraction)
+  |      |---> Splitting text into chunks
+  |      |---> SentenceTransformer
+  |      |---> ChromaDB
+  |
+Model Client (src/models/model_client.py)
+  ↓
+Ollama (Local LLM  - Qwen3:8b)
+```
 
 **Why:**
 - The way our architecture was built was the most sensible choice for this application.

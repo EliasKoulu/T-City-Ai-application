@@ -7,17 +7,20 @@ This document describes the baseline architectural layer of the application and 
 The starter application follows a clean layered separation of concerns:
 
 ```text
-User
+User (Uploading the PDF-files and query)
   ↓
-Gradio UI (app/ui.py)
+Gradio UI (app/ui.py). The user interface layer that receives the uploaded PDF-files and optional user queries.
   ↓
 Application / AI Service (src/services/ai_service.py)
-  ↓
+  |--> RAG (src/capabilities/rag.py)
+  |      |---> PyPDF (PDF text extraction)
+  |      |---> Splitting text into chunks
+  |      |---> SentenceTransformer
+  |      |---> ChromaDB
+  |
 Model Client (src/models/model_client.py)
   ↓
-Ollama (Local Inference Server)
-  ↓
-Local Model (e.g., llama3.2)
+Ollama (Local LLM  - Qwen3:8b)
 ```
 
 ### Core Design Rules
