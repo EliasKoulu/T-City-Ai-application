@@ -1,6 +1,6 @@
 # Project name
 
-Compare-and-analyze AI
+### Oikotie.fi Asuntoesitteiden Vertailukone (Oikotie.fi Property Listing Comparison Tool)
 
 ## Team members
 
@@ -14,11 +14,11 @@ Compare-and-analyze AI
 
 ### Intended users
 Who are the primary target users of this application?
-- The primary target users of this application is mostly workers who frequently analyze, evaluate and compare complex documents. Specifically analysts conducting analysis on products specs or legal team reviewing contracts and policies. In addition the app can be used by everyday people to compare different items to purchase. 
+- The primary target users for this application are mostly real estate agents who frequently analyze and compare two property listings. In addition the app can be used by everyday people to make a quick comparison between two apartments.
 
 ### Problem statement
 What specific problem does this application solve for those users?
-- Comparing documents manually is time consuming and it can be prone to errors. This application provides thorough comparison between documents and summarizes key differences and similarities by saving users time and preventing high costs.
+- Comparing two documents manually is time consuming and it can be prone to errors. This application provides thorough comparison between documents and summarizes key differences and similarities by saving users time.
 
 ### Why AI is appropriate
 Why does this problem require AI / LLM capabilities rather than traditional deterministic software?
@@ -27,12 +27,14 @@ Why does this problem require AI / LLM capabilities rather than traditional dete
 ## Solution
 
 Briefly describe your application, its primary value proposition, and how it addresses the problem statement above.
-- Our application of choice will be a document comparison tool designed to analyze two documents and summarize key differences. It's primary value comes from saving time and automating redundant repetitive tasks. It's for minimizing mistakes which come from repetitiveness and compares the documents on user input/preference.
+- Our application of choice will be a document comparison tool designed to analyze two property listing documents from www.oikotie.fi and summarize key differences. It's primary value comes from saving time and automating redundant repetitive tasks. It's for minimizing mistakes which come from repetitiveness and compares the documents on user input/preference.
 
 ## Main user workflow
 
-1. **User Input:** The user uploads two documents (PDF or word document) containing product specs or contracts to compare. In addition the details can be also copy-pasted in plain text format. The user then specifies and tells the program which key points and areas to focus on.
-2. **Processing & Guardrails:** The application checks for supported file formats and size limit of the documents to be uploaded. The app focuses on raw text and pictures ignoring the layout of the document.
+1. **User Input:** The user uploads two PDF-documents containing the specs of the two properties to compare. The user can then specify and tell the program which key points and areas to focus on. The specification box can also be left totally blank and the program will give a generic comparison of the most important features.
+
+2. **Processing & Guardrails:** The processing pipeline handles PDF text extraction via PyPDF, text chunking and vector storage in ChromaDB and sending the retrieved context to Ollama language model. 
+
 3. **Model Response:** The model generates a structured analysis containing a side-by-side comparison of the two documents. After that it is presented to the user as a clear visual comparison table.
 
 ## Architecture
@@ -40,15 +42,20 @@ Briefly describe your application, its primary value proposition, and how it add
 Below is the initial starter architecture. As your project evolves with additional capabilities, replace or extend this diagram in [`docs/architecture.md`](docs/architecture.md).
 
 ```text
-User
+User (Uploading the PDF-files and query)
   ↓
-Gradio UI (app/ui.py)
+Gradio UI (app/ui.py). The user interface layer that receives the uploaded PDF-files and optional user queries.
   ↓
 Application / AI Service (src/services/ai_service.py)
-  ↓
+  |--> RAG (src/capabilities/rag.py)
+  |      |---> PyPDF (PDF text extraction)
+  |      |---> Splitting text into chunks
+  |      |---> SentenceTransformer
+  |      |---> ChromaDB
+  |
 Model Client (src/models/model_client.py)
   ↓
-Ollama (Local LLM Server)
+Ollama (Local LLM  - Qwen3:8b)
 ```
 
 > **Core Architectural Rule:** The user interface must NEVER communicate directly with the model client or Ollama. All interactions must pass through the service layer (`ai_service.py`).
@@ -62,17 +69,17 @@ Ollama (Local LLM Server)
 
 Select at least one additional capability to implement for your final project:
 
-- [ ] RAG (Retrieval-Augmented Generation)
+- [X] RAG (Retrieval-Augmented Generation)
 - [ ] Tools / External API integration
 - [ ] Model Context Protocol (MCP)
 - [ ] Agentic workflow (Model-selected actions based on observations)
 - [ ] Memory / Persistent state
-- [X] Multimodal interaction (Text + Images)
+- [ ] Multimodal interaction (Text + Images)
 - [ ] Other: ______________________
 
 ### Capability justification
 Explain why the selected capability is useful and necessary for your application's user problem.
-- Multimodal interaction allows the application to process text and visual elements simultaneously. Real world documents often rely on diagrams and embedded images so this will give a thorough and more accurate analysis of the documents rather than just focusing on raw text.
+- RAG (Retrieval-Augmented Generation) allow the application to retrieve information from the uploaded PDF-files. Property listings from www.oikotie.fi are solely downloadable in PDF-format and RAG fits perfectly in our application.
 
 ## Setup
 
