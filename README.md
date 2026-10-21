@@ -147,8 +147,12 @@ Refer to [`evaluation/README.md`](evaluation/README.md) for guidelines on defini
 
 ## Known limitations
 
-- Highlight known system limitations, unhandled edge cases, or boundaries of current capabilities.
+- Using a model with a context length of 32k tokens can be limiting when comparing two very long documents. The model may not be able to process the entire content of both documents at once, which could lead to incomplete or inaccurate comparisons.
+- Current implementation only supports PDF.
+- The model may not always provide accurate or relevant comparisons, especially if the documents contain complex or ambiguous information.
+
 
 ## Future improvements
 
-- List planned feature enhancements, architectural refactorings, or future capabilities.
+- More support for different filetypes, now the tool can only handle PDF.
+- Improvements to the general quality of answers.
