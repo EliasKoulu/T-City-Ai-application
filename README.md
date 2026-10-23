@@ -84,12 +84,14 @@ Explain why the selected capability is useful and necessary for your application
 ## Setup
 
 ### 1. Create the Conda environment
+- Make sure that Anaconda has been installed on your machine. Create a new python-environment by running this command in root directory
 
 ```bash
 conda env create -f environment.yml
 ```
 
 ### 2. Activate the environment
+- Activate the environment we just created with this command
 
 ```bash
 conda activate dev-ai-project
@@ -97,7 +99,7 @@ conda activate dev-ai-project
 
 ### 3. Configure environment variables
 
-Copy `.env.example` to create your local `.env` configuration file:
+The directory contains a file `.env.example`. To create your local `.env` configuration file run this command:
 
 On Linux / macOS:
 ```bash
@@ -109,10 +111,10 @@ On Windows (Command Prompt / PowerShell):
 copy .env.example .env
 ```
 
-Ensure `.env` contains valid values for `OLLAMA_BASE_URL` and `MODEL_NAME`:
+Make sure `.env` now contains the following: 
 ```env
 OLLAMA_BASE_URL=http://localhost:11434
-MODEL_NAME=llama3.2
+MODEL_NAME=qwen3:8b
 ```
 
 ### 4. Start Ollama
@@ -120,7 +122,7 @@ MODEL_NAME=llama3.2
 Make sure Ollama is installed and running locally, then pull your configured model:
 
 ```bash
-ollama run llama3.2
+ollama run qwen3:8b
 ```
 
 ### 5. Run the application
