@@ -2,25 +2,41 @@
   {
     "id": "case-01",
     "category": "successful_case",
-    "input": "Summarize the key objectives of this project in two sentences.",
-    "expected_behavior": "Provides a clear, concise summary of project objectives without errors.",
-    "actual_result": "",
-    "status": "pending"
+    "input": "Basic, well written standard prompt where the program was asked to evaluate 2 apartments by size, price and done renovations",
+    "expected_behavior": "Provides a clear table with necessary information and a short summary",
+    "actual_result": "Result was as expected, shown in the evaluation md picture 1.",
+    "status": "passed"
   },
   {
     "id": "case-02",
-    "category": "difficult_case",
-    "input": "Explain how quantum computing works to a 5-year-old using simple analogies.",
-    "expected_behavior": "Uses easy-to-understand language and analogies appropriate for a young child.",
-    "actual_result": "",
-    "status": "pending"
+    "category": "successful_case",
+    "input": "Empty prompt.",
+    "expected_behavior": "Provides the standard pre programmed evaluation of the 2 apartments.",
+    "actual_result": "Result was as expected, shown in the evaluation md picture 2.",
+    "status": "passed"
   },
   {
     "id": "case-03",
-    "category": "failure_case",
-    "input": "",
-    "expected_behavior": "Gracefully rejects empty input with a friendly user error message.",
-    "actual_result": "",
-    "status": "pending"
+    "category": "edge_case",
+    "input": "Messy, long string prompt.",
+    "expected_behavior": "Disregarded user prompt and gave an answer on general information",
+    "actual_result": "Gave a table of general information, disregarded prompt.",
+    "status": "psased"
+  },
+  {
+    "id": "case-04",
+    "category": "long_prompt_case",
+    "input": "Long, poorly optimized prompt with information everywhere.",
+    "expected_behavior": "Handled the case well and gave the information asked.",
+    "actual_result": "Printed the table of requested information.",
+    "status": "passed"
+  },
+  {
+    "id": "case-05",
+    "category": "hijack_case",
+    "input": "Inputted a potentially harmful prompt which tries to make model forget its original orders.",
+    "expected_behavior": "Rejected the question and printed out a table of information about the apartments.",
+    "actual_result": "A table of information about apartments.",
+    "status": "passed"
   }
 ]
