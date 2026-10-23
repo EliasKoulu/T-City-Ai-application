@@ -126,7 +126,7 @@ Noudata tiukasti seuraavia sääntöjä:
 | Kunto | | |
 | Lämmitysmuoto | | |
 
-3. Esitä taulukon alapuolella lyhyt yhteenveto asuntojen suurimmista eroista sekä ostajasuositus, MAKSIMISSAAN 3-4 LAUSETTA.
+3. Esitä taulukon alapuolella MAKSIMISSAAN 4 lauseen mittainen yhteenveto, jossa kerrotaan lyhyesti mahdolliset merkittävät erot.
 4. Vertailtavien tiedostojen otsikko on vasemmalla ja itse otsikkoa vastaava tieto oikealla. Tämä osuus tulee tiedostoissa olevan tekstin jälkeen.
 5. Tiedoistoissa on taulukko jossa vasemmassa sarakkeessa on ominaisuuden nimi ja oikealla sarakkeessa sen arvo. Käytä näitä tietoja vertailussa.
 """
