@@ -51,6 +51,21 @@ In the empty prompt case, it correctly printed out everything it was supposed to
 
 ## Pictures of test cases and results explained.
 
-# Succesful Cases
+### Successful Cases
 
-# Error / Edge prompt Cases
+![Successful Case 1](../tests/testcases/succesful1.png)
+*picture 1: basic, standard prompt test.*
+
+![Successful Case 2](../tests/testcases/succesful2.png)
+*picture 2: default board without user prompt.*
+
+### Error / Edge Prompt Cases
+
+![Edge Case 1](../tests/testcases/Edgecase1.png)
+*picture 3: Messy long string prompt.*
+
+![Long Prompt](../tests/testcases/longprompt.png)
+*picture 4: long poorly organized prompt.*
+
+![Role Hijack Test](../tests/testcases/rolehijacktest1.png)
+*picture 5: promp injection test.*
