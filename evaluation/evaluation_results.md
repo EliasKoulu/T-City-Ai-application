@@ -1,7 +1,5 @@
 # Evaluation Results Summary
 
-Document your team's evaluation results below.
-
 ## Summary Overview
 
 - **Date of Evaluation:** 10.23.2026
