@@ -113,13 +113,23 @@ SYSTEM_PROMPT = """Olet ammattimainen ja objektiivinen kiinteistöalan asiantunt
 
 Noudata tiukasti seuraavia sääntöjä:
 1. Käytä AINOASTAAN annettuja tiedostoja lähteenä. Älä keksi omia hintoja, neliöitä, hoitovastikkeita tai remonttitietoja.
-2. Rakenna vertailusta aina selkeä Markdown-taulukko (sarakkeet: Ominaisuus | Asunto A | Asunto B).
+2. Kopioi ja täytä AINA alla oleva kiinteä Markdown-taulukko. Älä poista rivejä tai muuta vasemman sarakkeen ominaisuuksia. Etsi teksteistä otsikoita vastaavat tiedot Asunto A ja Asunto B -sarakkeisiin. Jos jotain tietoa ei löydy, kirjoita sen solun kohdalle pelkkä "-":
+
+| Ominaisuus | Asunto A | Asunto B |
+| :--- | :--- | :--- |
+| Hinta | | |
+| Pinta-ala | | |
+| Huoneiston kokoonpano | | |
+| Rakennusvuosi ja tyyppi | | |
+| Tontin omistus | | |
+| Hoitovastike | | |
+| Kunto | | |
+| Lämmitysmuoto | | |
+
 3. Esitä taulukon alapuolella lyhyt yhteenveto asuntojen suurimmista eroista sekä ostajasuositus.
 4. Vertailtavien tiedostojen otsikko on vasemmalla ja itse otsikkoa vastaava tieto oikealla. Tämä osuus tulee tiedostoissa olevan tekstin jälkeen.
 5. Tiedoistoissa on taulukko jossa vasemmassa sarakkeessa on ominaisuuden nimi ja oikealla sarakkeessa sen arvo. Käytä näitä tietoja vertailussa.
 """
-
-
 
 
 class AIService:
@@ -143,10 +153,6 @@ class AIService:
         return self.rag_service
 
     def process_message(self, pdf1_path: str, pdf2_path: str, user_query: str) -> AIResponse:
-        """
-        Käsittelee käyttöliittymästä tulevat PDF-tiedostot ja käyttäjän syötteen.
-        Käyttää RAG-putkea tiedonhakuun ja generoi vertailun tekoälymallilla.
-        """
         # 1. Validointi: Varmistetaan, että molemmat tiedostot on ladattu
         if not pdf1_path or not pdf2_path:
             return AIResponse(
@@ -156,16 +162,24 @@ class AIService:
             )
 
         try:
-            # 2. RAG-käsittely: Luetaan ja vektoroidaan asuntodokumentit
+            # Käynnistetään RAG ja luetaan tiedostot
             rag = self._get_rag()
             rag.process_documents(pdf1_path, pdf2_path)
             
-            # 3. Tiedonhaku: Etsitään oleellinen konteksti vektoritietokannasta
-            # Jos käyttäjä ei antanut erityistoivetta, käytetään yleistä vertailuhakua
-            hakusana = user_query if user_query and user_query.strip() else "asuntojen koko, hinta, kunto ja lämmitys"
-            context = rag.search_context(hakusana, top_k=6)
+            # Vahvistetaan oletushakusanaa niin, että se hakee taulukon asiat automaattisesti.
+            vakio_hakusanat = "Velaton hinta Myyntihinta Hoitovastike Yhtiövastike Asuinpinta-ala Huoneiston kokoonpano Rakennusvuosi Tontin omistus Kunto Lämmitysmuoto"
             
-            erityistoive = user_query if user_query and user_query.strip() else "Tee yleinen vertailu tärkeimmistä ominaisuuksista."
+            if user_query and user_query.strip():
+                # Jos käyttäjä kysyy jotain, haetaan sitä + perusasiat päälle
+                hakusana = f"{user_query} {vakio_hakusanat}"
+                erityistoive = user_query.strip()
+            else:
+                # Jos käyttäjä jättää kentän tyhjäksi, haetaan raskaalla oletushaulla
+                hakusana = vakio_hakusanat
+                erityistoive = "Täytä vertailutaulukko tarkasti annettujen lähdetietojen perusteella."
+            
+            # Nyt rag on olemassa ja haku toimii
+            context = rag.search_context(hakusana, top_k=8)
             
             user_prompt = f"""Käyttäjän erityistoive vertailulle: "{erityistoive}"
 
