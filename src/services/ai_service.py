@@ -186,7 +186,9 @@ class AIService:
 LÄHDETEKSTI (Oikotien esitteistä irrotettu tieto):
 {context}
 
-Rakenna näiden tietojen pohjalta selkeä vertailu.
+Käytä käyttäjän erityistoivetta ja yllä olevaa lähdetekstiä niin, että vastaat TÄYSIN käyttäjän kyselyyn.
+
+Taulukon sekä yhteenvedon alle oma osuus, jonka otsikko on: "  Käyttäjän kysymys: {user_query}". Vastaa käyttäjän kysymykseen lyhyesti ja ytimekkäästi, mutta vain annettujen tietojen perusteella. Älä keksi mitään tietoja itse. Jos kysymykseen ei löydy vastausta, kerro se selkeästi.
 """
 
             # 5. Kutsutaan Ollama-mallia
