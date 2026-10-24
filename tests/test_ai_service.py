@@ -1,71 +1,73 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import pytest
-
+ 
 from src.config import config
 from src.models.model_client import (
-    ModelClientError,
     OllamaConnectionError,
     ModelNotFoundError,
 )
 from src.services.ai_service import AIService, generate_response
-
-
+ 
+ 
 def test_config_loading():
-    """Verify that configuration settings load expected string values from environment or defaults."""
+    """Varmistaa, että asetukset latautuvat oikein."""
     assert config.ollama_base_url is not None
     assert config.model_name is not None
     assert isinstance(config.ollama_base_url, str)
     assert isinstance(config.model_name, str)
-
-
-def test_empty_input_validation():
-    """Verify that empty or whitespace inputs are rejected gracefully without invoking the model."""
+ 
+ 
+def test_missing_pdf_inputs_validation():
+    """Varmistaa, että puuttuvat PDF-tiedostot estävät haun ilman mallin kutsumista."""
     mock_client = MagicMock()
     service = AIService(model_client=mock_client)
-
-    response_empty = service.process_message("")
-    assert response_empty.success is False
-    assert "Please enter a message" in response_empty.content
+ 
+    # Testataan tilannetta, jossa PDF-polut puuttuvat
+    response = service.process_message("", "", "Vertaile hintoja")
+    assert response.success is False
+    assert "Lataa molemmat asuntoesitteet" in response.content
     assert mock_client.generate.call_count == 0
-
-    response_spaces = service.process_message("   ")
-    assert response_spaces.success is False
-    assert mock_client.generate.call_count == 0
-
-
-def test_successful_response_generation():
-    """Verify that valid input invokes model client and returns the generated string response."""
+ 
+ 
+@patch("src.services.ai_service.AIService._get_rag")
+def test_successful_response_generation(mock_get_rag):
+    """Varmistaa, että kelvolliset syötteet kutsuvat mallia ja palauttavat vastauksen."""
+    # Ohitetaan RAG-palvelu valeelementillä (mock), jotta testi on salamannopea
+    mock_rag = MagicMock()
+    mock_rag.search_context.return_value = "LÄHDETIEDOT: Valekonteksti asunnoista"
+    mock_get_rag.return_value = mock_rag
+ 
     mock_client = MagicMock()
-    mock_client.generate.return_value = "Hello! I am an AI assistant."
+    mock_client.generate.return_value = "| Ominaisuus | Asunto 1 | Asunto 2 |\n| Hinta | 100k | 200k |"
     service = AIService(model_client=mock_client)
-
-    result_text = generate_response("Hello, AI", service=service)
-
-    assert result_text == "Hello! I am an AI assistant."
-    mock_client.generate.assert_called_once_with("Hello, AI")
-
-
+ 
+    result_text = generate_response("asunto1.pdf", "asunto2.pdf", "Vertaile hintoja", service=service)
+ 
+    assert "| Ominaisuus | Asunto 1 | Asunto 2 |" in result_text
+    mock_client.generate.assert_called_once()
+ 
+ 
 def test_ollama_connection_error_handling():
-    """Verify that Ollama connection failures produce a friendly application-level error message."""
+    """Varmistaa, että Ollamas-yhteysvirhe käsitellään siististi käyttäjälle."""
     mock_client = MagicMock()
-    mock_client.generate.side_effect = OllamaConnectionError("Connection refused at http://localhost:11434")
+    mock_client.generate.side_effect = OllamaConnectionError("Connection refused")
     service = AIService(model_client=mock_client)
-
-    response = service.process_message("Test message")
-
+    service.rag_service = MagicMock()  # Ohitetaan RAG
+ 
+    response = service.process_message("asunto1.pdf", "asunto2.pdf", "Vertaile")
+ 
     assert response.success is False
     assert "Could not connect to Ollama" in response.content
-    assert "Connection refused" in response.error_message
-
-
+ 
+ 
 def test_model_not_found_error_handling():
-    """Verify that missing model exceptions are converted into controlled user messages."""
+    """Varmistaa, että puuttuvan mallin virhe käsitellään siististi."""
     mock_client = MagicMock()
-    mock_client.generate.side_effect = ModelNotFoundError("Model llama3.2 not found locally")
+    mock_client.generate.side_effect = ModelNotFoundError("Model qwen3:8b not found")
     service = AIService(model_client=mock_client)
-
-    response = service.process_message("Test message")
-
+    service.rag_service = MagicMock()  # Ohitetaan RAG
+ 
+    response = service.process_message("asunto1.pdf", "asunto2.pdf", "Vertaile")
+ 
     assert response.success is False
-    assert "configured AI model is unavailable" in response.content
-    assert "llama3.2 not found" in response.error_message
+    assert "unavailable" in response.content

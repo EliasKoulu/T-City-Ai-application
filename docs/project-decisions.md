@@ -21,7 +21,7 @@ When ollama is ran locally it eliminates api latency, costs and data privacy ris
 - RAG (Retrieval-augmented generation)
 
 **Why it is needed:**
-- RAG is required in this application to extract and retrieve specific context directly from PDF property listings. This grounds the AI model's responses in data from the documents since pdf about apartments are usually long, unstructured text / picture files and multi column tables at times. Passing this all information directly into the LLM context  may lead to model hallucinations or details missing.
+- RAG is required in this application to extract and retrieve specific context directly from PDF property listings. This grounds the AI model's responses in data from the documents since pdf about apartments are usually long, unstructured text / picture files and multi column tables at times. Passing this all information directly into the LLM context may lead to model hallucinations or details missing.
 
 **Alternatives considered:**
 - First we considered to use Multimodal Interaction. However after few meetings, learing more about the course chapters and getting familiar with the project we decided that RAG is the best choice for this specific application since text base rag uses pypdf is faster and less computationally demanding plus reliable for structured data extraction.

@@ -35,11 +35,9 @@ Briefly describe your application, its primary value proposition, and how it add
 
 2. **Processing & Guardrails:** The processing pipeline handles PDF text extraction via PyPDF, text chunking and vector storage in ChromaDB and sending the retrieved context to Ollama language model. 
 
-3. **Model Response:** The model generates a structured analysis containing a side-by-side comparison of the two documents. After that it is presented to the user as a clear visual comparison table.
+3. **Model Response:** The model generates a structured analysis containing a side-by-side comparison of the two documents. After that it is presented to the user as a clear visual comparison table. With a short summary below the table.
 
 ## Architecture
-
-Below is the initial starter architecture. As your project evolves with additional capabilities, replace or extend this diagram in [`docs/architecture.md`](docs/architecture.md).
 
 ```text
 User (Uploading the PDF-files and query)
@@ -49,16 +47,14 @@ Gradio UI (app/ui.py). The user interface layer that receives the uploaded PDF-f
 Application / AI Service (src/services/ai_service.py)
   |--> RAG (src/capabilities/rag.py)
   |      |---> PyPDF (PDF text extraction)
-  |      |---> Splitting text into chunks
-  |      |---> SentenceTransformer
-  |      |---> ChromaDB
+  |      |---> Splitting text into chunks (400 chars / 100 overlap)
+  |      |---> SentenceTransformer (paraphrase-multilingual-MiniLM-L12-v2)
+  |      |---> ChromaDB (filtered by asunto 1 / asunto 2 = forced to create two seperate balanced queries)
   |
 Model Client (src/models/model_client.py)
   ↓
 Ollama (Local LLM  - Qwen3:8b)
 ```
-
-> **Core Architectural Rule:** The user interface must NEVER communicate directly with the model client or Ollama. All interactions must pass through the service layer (`ai_service.py`).
 
 ## Model
 
@@ -74,7 +70,7 @@ Select at least one additional capability to implement for your final project:
 - [ ] Model Context Protocol (MCP)
 - [ ] Agentic workflow (Model-selected actions based on observations)
 - [ ] Memory / Persistent state
-- [ ] Multimodal interaction (Text + Images)
+- [/] Multimodal interaction (Text + Images) -> Tested but not chosen.
 - [ ] Other: ______________________
 
 ### Capability justification
@@ -143,9 +139,15 @@ pytest
 
 ## Evaluation
 
-Describe your evaluation methodology and summarize key results. Starter test cases can be found in [`evaluation/test_cases.json`](evaluation/test_cases.json).
+For evaluation we used manual evaluation method. Different style of prompts were chosen to test the programs capabilities.
 
-Refer to [`evaluation/README.md`](evaluation/README.md) for guidelines on defining success, edge cases, and failure scenarios.
+1. First test was a standard, well structured prompt.
+2. Second test contained a long, unorganized but still understandable prompt.
+3. Third test was an empty prompt.
+4. Fourth test had a prompt with totally random string of charcters.
+5. Fifth test had a prompt which was malicious prompt, trying to role hijack.
+
+Every test came out passing, the program worked as it should and returned the expected answers. You can find clearer information about the testing conducted and photos of the tests in [evaluation_results.md].
 
 ## Known limitations
 
