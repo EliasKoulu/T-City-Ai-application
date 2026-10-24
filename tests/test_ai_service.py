@@ -22,7 +22,7 @@ def test_missing_pdf_inputs_validation():
     mock_client = MagicMock()
     service = AIService(model_client=mock_client)
  
-    # Testataan tilannetta, jossa PDF-polut puuttuvat
+
     response = service.process_message("", "", "Vertaile hintoja")
     assert response.success is False
     assert "Lataa molemmat asuntoesitteet" in response.content
@@ -32,7 +32,7 @@ def test_missing_pdf_inputs_validation():
 @patch("src.services.ai_service.AIService._get_rag")
 def test_successful_response_generation(mock_get_rag):
     """Varmistaa, että kelvolliset syötteet kutsuvat mallia ja palauttavat vastauksen."""
-    # Ohitetaan RAG-palvelu valeelementillä (mock), jotta testi on salamannopea
+
     mock_rag = MagicMock()
     mock_rag.search_context.return_value = "LÄHDETIEDOT: Valekonteksti asunnoista"
     mock_get_rag.return_value = mock_rag
@@ -52,7 +52,7 @@ def test_ollama_connection_error_handling():
     mock_client = MagicMock()
     mock_client.generate.side_effect = OllamaConnectionError("Connection refused")
     service = AIService(model_client=mock_client)
-    service.rag_service = MagicMock()  # Ohitetaan RAG
+    service.rag_service = MagicMock()  
  
     response = service.process_message("asunto1.pdf", "asunto2.pdf", "Vertaile")
  
@@ -65,7 +65,7 @@ def test_model_not_found_error_handling():
     mock_client = MagicMock()
     mock_client.generate.side_effect = ModelNotFoundError("Model qwen3:8b not found")
     service = AIService(model_client=mock_client)
-    service.rag_service = MagicMock()  # Ohitetaan RAG
+    service.rag_service = MagicMock()  
  
     response = service.process_message("asunto1.pdf", "asunto2.pdf", "Vertaile")
  
