@@ -157,5 +157,5 @@ Refer to [`evaluation/README.md`](evaluation/README.md) for guidelines on defini
 
 ## Future improvements
 
-- More support for different filetypes, now the tool can only handle PDF.
-- Improvements to the general quality of answers.
+- [ ] More support for different filetypes, now the tool can only handle PDF.
+- [x] Improvements to the general quality of answers.

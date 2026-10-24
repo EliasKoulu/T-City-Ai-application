@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
 
-# Kerrotaan Pythonille, missä koko projektin juurikansio sijaitsee
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from app.ui import build_ui

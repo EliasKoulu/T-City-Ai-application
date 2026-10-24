@@ -24,7 +24,7 @@ class OllamaModelClient:
     def __init__(self, base_url: Optional[str] = None, model_name: Optional[str] = None):
         self.base_url = base_url or config.ollama_base_url
         self.model_name = model_name or config.model_name
-        # Lisätty timeout=300 (5 min), jotta raskas vertailu tai qwen3:8b ei katkea ReadTimeout-virheeseen
+
         self._client = ollama.Client(host=self.base_url)
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None, temperature: float = 0.1) -> str:
@@ -34,7 +34,6 @@ class OllamaModelClient:
         Raises ModelClientError subclass if connection or execution fails.
         """
         try:
-            # Rakennetaan viestilista
             messages = []
             if system_prompt:
                 messages.append({"role": "system", "content": system_prompt})
@@ -43,10 +42,9 @@ class OllamaModelClient:
             response = self._client.chat(
                 model=self.model_name,
                 messages=messages,
-                options={"temperature": temperature}, # Ohjataan malli pysymään faktoissa
+                options={"temperature": temperature},
             )
             
-            # Standardize extraction from dict or chat response object
             if isinstance(response, dict):
                 return response.get("message", {}).get("content", "")
             elif hasattr(response, "message") and hasattr(response.message, "content"):

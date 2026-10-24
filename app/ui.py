@@ -93,23 +93,20 @@ def build_ui() -> gr.Blocks:
                 label="Vertailun tulos"
             )
 
-        # 1. Apufunktio, joka palauttaa odotustekstin välittömästi
         def show_loading():
             return "⏳ **Tekoäly lukee esitteitä ja rakentaa vertailua, odota hetki...** *(Ensimmäisellä kerralla mallin lataus muistiin voi kestää tovin)*"
 
-        # 2. Ketjutetaan painikkeen toiminnot .then() -komennolla
         submit_btn.click(
             fn=show_loading,
             inputs=None,
             outputs=output_box,
-            queue=False # Estää tämän vaiheen jonottamisen, tulostuu heti
+            queue=False
         ).then(
             fn=generate_response,
             inputs=[pdf1_input, pdf2_input, user_query],
             outputs=output_box,
         )
         
-        # 3. Tehdään sama myös Enterin painallukselle (submit)
         user_query.submit(
             fn=show_loading,
             inputs=None,

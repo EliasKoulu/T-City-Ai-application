@@ -23,13 +23,11 @@ def test_empty_input_validation():
     mock_client = MagicMock()
     service = AIService(model_client=mock_client)
 
-    # Test empty string
     response_empty = service.process_message("")
     assert response_empty.success is False
     assert "Please enter a message" in response_empty.content
     assert mock_client.generate.call_count == 0
 
-    # Test whitespace string
     response_spaces = service.process_message("   ")
     assert response_spaces.success is False
     assert mock_client.generate.call_count == 0
