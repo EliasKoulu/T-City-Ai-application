@@ -1,7 +1,5 @@
 # Architecture Documentation
 
-This document describes the baseline architectural layer of the application and provides guidance on extending it for your team project.
-
 ## Baseline Architecture
 
 The starter application follows a clean layered separation of concerns:
