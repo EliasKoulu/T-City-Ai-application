@@ -9,7 +9,7 @@
 - Kim Erwe kim.erwe@student.hamk.fi
 - Riku Turunen riku.turunen@student.hamk.fi
 
-Video presentation link: https://drive.google.com/file/d/1OaCfn1OD-6Qu98VW8tW1EeeZF7reX1z8/view?usp=drive_link
+Video presentation link: https://drive.google.com/file/d/1tWhQyDTBKqX7JCOQdX9oEOkf5zG9usm8/view?usp=sharing
 
 
 ## Problem
